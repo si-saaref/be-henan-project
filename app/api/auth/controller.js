@@ -95,4 +95,42 @@ module.exports = {
 			res.status(500).json({ message: error.message || 'Internal Message Error', status: 500 });
 		}
 	},
+	updateUser: async (req, res, next) => {
+		try {
+			const { userId } = req.user;
+			const { firstName, lastName, email, userName } = req.body;
+
+			const checkUser = await User.findOne({
+				where: { id: userId },
+			});
+
+			if (!checkUser) {
+				res.status(404).json({ message: 'User not found', status: 200 });
+				return;
+			}
+
+			try {
+				await userNameChecker(userName.trim());
+				firstNameChecker(firstName.trim());
+				lastNameChecker(lastName.trim());
+				emailChecker(email.trim());
+			} catch (error) {
+				res.status(406).json({ message: error.message, status: 406 });
+				return;
+			}
+
+			const updatedUser = await checkUser.update({
+				id: userId,
+				firstName: firstName.trim(),
+				lastName: lastName.trim(),
+				email: email.trim(),
+				userName: userName.trim(),
+			});
+			delete updatedUser.dataValues.password;
+			res.status(200).json({ message: 'Successfully update user', status: 200, data: updatedUser });
+		} catch (error) {
+			next(error);
+			res.status(500).json({ message: error.message || 'Internal Message Error', status: 500 });
+		}
+	},
 };
