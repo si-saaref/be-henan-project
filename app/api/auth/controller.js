@@ -1,5 +1,6 @@
 const { User } = require('../../db/models');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const {
 	passwordChecker,
 	userNameChecker,
@@ -13,7 +14,9 @@ module.exports = {
 		try {
 			const { firstName, lastName, email, password, userName } = req.body;
 			const checkUser = await User.findOne({
-				where: { email },
+				where: {
+					email: email.trim(),
+				},
 			});
 
 			if (checkUser) {
@@ -48,6 +51,47 @@ module.exports = {
 			res.status(200).json({ message: 'Register successfully', status: 200, data: userPayload });
 		} catch (error) {
 			if (t) await t.rollback();
+			res.status(500).json({ message: error.message || 'Internal Message Error', status: 500 });
+		}
+	},
+	login: async (req, res) => {
+		try {
+			const { email, password } = req.body;
+			const userPayload = await User.findOne({
+				where: {
+					email: email.trim(),
+				},
+			});
+			if (!userPayload) {
+				res.status(401).json({ message: "Email and Password didn't match", status: 401 });
+				return;
+			} else {
+				const checkPassword = bcrypt.compareSync(password.trim(), userPayload.password);
+				if (!checkPassword) {
+					res.status(401).json({ message: "Email and Password didn't match", status: 401 });
+					return;
+				}
+			}
+			const token = jwt.sign(
+				{
+					user: {
+						id: userPayload.id,
+						email: userPayload.email,
+						firstName: userPayload.firstName,
+						lastName: userPayload.lastName,
+					},
+				},
+				'secret',
+				{
+					expiresIn: '24h',
+				}
+			);
+
+			const dataPayload = {
+				token,
+			};
+			res.status(200).json({ message: 'Login Successfully', status: 200, data: dataPayload });
+		} catch (error) {
 			res.status(500).json({ message: error.message || 'Internal Message Error', status: 500 });
 		}
 	},
