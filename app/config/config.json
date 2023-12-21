@@ -1,0 +1,23 @@
+{
+	"development": {
+		"username": "adm-be-hpam",
+		"password": "admHp4m2112",
+		"database": "db-be-henan-project",
+		"host": "127.0.0.1",
+		"dialect": "postgres"
+	},
+	"test": {
+		"username": "adm-be-hpam",
+		"password": "admHp4m2112",
+		"database": "db-be-henan-project",
+		"host": "127.0.0.1",
+		"dialect": "postgres"
+	},
+	"production": {
+		"username": "adm-be-hpam",
+		"password": "admHp4m2112",
+		"database": "db-be-henan-project",
+		"host": "127.0.0.1",
+		"dialect": "postgres"
+	}
+}
