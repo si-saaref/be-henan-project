@@ -143,6 +143,11 @@ module.exports = {
 				where: { id: userId },
 			});
 
+			if (!checkUser) {
+				res.status(404).json({ message: 'User not found', status: 404 });
+				return;
+			}
+
 			const checkPassword = bcrypt.compareSync(lastPassword.trim(), checkUser.password);
 			if (!checkPassword) {
 				res.status(400).json({
@@ -156,11 +161,6 @@ module.exports = {
 				passwordChecker(newPassword.trim());
 			} catch (error) {
 				res.status(406).json({ message: error.message, status: 406 });
-				return;
-			}
-
-			if (!checkUser) {
-				res.status(404).json({ message: 'User not found', status: 404 });
 				return;
 			}
 
