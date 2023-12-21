@@ -95,7 +95,7 @@ module.exports = {
 			res.status(500).json({ message: error.message || 'Internal Message Error', status: 500 });
 		}
 	},
-	updateUser: async (req, res, next) => {
+	updateUser: async (req, res) => {
 		try {
 			const { userId } = req.user;
 			const { firstName, lastName, email, userName } = req.body;
@@ -105,7 +105,7 @@ module.exports = {
 			});
 
 			if (!checkUser) {
-				res.status(404).json({ message: 'User not found', status: 200 });
+				res.status(404).json({ message: 'User not found', status: 404 });
 				return;
 			}
 
@@ -127,9 +127,52 @@ module.exports = {
 				userName: userName.trim(),
 			});
 			delete updatedUser.dataValues.password;
-			res.status(200).json({ message: 'Successfully update user', status: 200, data: updatedUser });
+			res
+				.status(200)
+				.json({ message: 'Successfully update user profile', status: 200, data: updatedUser });
 		} catch (error) {
-			next(error);
+			res.status(500).json({ message: error.message || 'Internal Message Error', status: 500 });
+		}
+	},
+	updateUserPassword: async (req, res) => {
+		try {
+			const { userId } = req.user;
+			const { newPassword, lastPassword } = req.body;
+
+			const checkUser = await User.findOne({
+				where: { id: userId },
+			});
+
+			const checkPassword = bcrypt.compareSync(lastPassword.trim(), checkUser.password);
+			if (!checkPassword) {
+				res.status(400).json({
+					message: 'Failed to change password due to your former password is incorrect',
+					status: 400,
+				});
+				return;
+			}
+
+			try {
+				passwordChecker(newPassword.trim());
+			} catch (error) {
+				res.status(406).json({ message: error.message, status: 406 });
+				return;
+			}
+
+			if (!checkUser) {
+				res.status(404).json({ message: 'User not found', status: 404 });
+				return;
+			}
+
+			const updatedUser = await checkUser.update({
+				id: userId,
+				password: bcrypt.hashSync(newPassword.trim(), 10),
+			});
+			delete updatedUser.dataValues.password;
+			res
+				.status(200)
+				.json({ message: 'Successfully update password', status: 200, data: updatedUser });
+		} catch (error) {
 			res.status(500).json({ message: error.message || 'Internal Message Error', status: 500 });
 		}
 	},
