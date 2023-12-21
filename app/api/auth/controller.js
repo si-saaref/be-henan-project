@@ -169,9 +169,7 @@ module.exports = {
 				password: bcrypt.hashSync(newPassword.trim(), 10),
 			});
 			delete updatedUser.dataValues.password;
-			res
-				.status(200)
-				.json({ message: 'Successfully update password', status: 200, data: updatedUser });
+			res.status(200).json({ message: 'Successfully update password', status: 200 });
 		} catch (error) {
 			res.status(500).json({ message: error.message || 'Internal Message Error', status: 500 });
 		}

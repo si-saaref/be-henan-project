@@ -9,6 +9,7 @@ const { rateLimit } = require('express-rate-limit');
 const authRouter = require('./app/api/auth/router');
 
 const app = express();
+const apiVersion = '/api/v1';
 
 app.use(cors());
 app.use(helmet());
@@ -25,6 +26,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', limiter, authRouter);
+app.use(`${apiVersion}/auth`, limiter, authRouter);
 
 module.exports = app;
